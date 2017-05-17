@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html ng-app="starter" ng-controller="globalCtrl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+  <link rel="stylesheet" type="text/css" href="style/style.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="bower_components/ngToast/dist/ngToast.min.css">
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+  <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+  <script src="bower_components/ngToast/dist/ngToast.min.js"></script>
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+  <script src="bower_components/ng-twitter-api/dist/ng-twitter-api.min.js"></script>
+  <script src="bower_components/jsSHA/src/sha1.js"></script>
+  <script>
+  </script>
+</head>
+
+<body>
+  <toast></toast>
+  <md-toolbar class="md-hue-2" style="-webkit-app-region: drag; position:fixed; top:0;">
+    <div class="md-toolbar-tools">
+      <md-button class="md-icon-button" aria-label="Settings" ng-disabled="true">
+        <i class="material-icons">settings</i>
+      </md-button>
+      <h2>
+        <span>Twitter Tools</span>
+      </h2>
+      <span flex></span>
+      <!-- start -->
+      <div class="md-menu-demo" ng-controller="contextMenuCtrl as ctrl" ng-cloak>
+        <div class="menu-demo-container" layout-align="center center" layout="column">
+          <md-menu md-position-mode="target-right target">
+            <md-button aria-label="Open phone interactions menu" class="md-icon-button" ng-click="ctrl.openMenu($mdOpenMenu, $event)">
+              <i class="material-icons">list</i>
+            </md-button>
+            <md-menu-content width="4">
+              <md-menu-item>
+                <md-button>
+                  <img ng-src="{{myProfile.profile_image_url_https}} " class="img-circle"> <span> {{myProfile.screen_name}}</span>
+                  <span class="logouttext">Logout</span>
+                </md-button>
+              </md-menu-item>
+              <md-menu-item>
+                <md-button>
+                  <i class="material-icons rightMenuList">help_outline</i> <span>About</span>
+                </md-button>
+              </md-menu-item>
+              <md-menu-item>
+                <md-button id="close-btn">
+                  <i class="material-icons rightMenuList">close</i> <span>Exit</span>
+                </md-button>
+              </md-menu-item>
+            </md-menu-content>
+          </md-menu>
+        </div>
+      </div>
+      <!-- stop -->
+    </div>
+  </md-toolbar>
+  <div ng-cloak>
+    <md-content>
+      <md-tabs md-dynamic-height md-border-bottom md-selected="tabs.selectedIndex">
+        <md-tab label=" Unfollow " ng-click="scrollTop()" ng-disabled="tab1">
+          <md-content class="md-padding tabContent">
+            <div ng-hide="unfollowStep1 " class="unfollowStep1 ">
+              <p>&nbsp;</p>
+              <h1 class="md-display-1 ">Unfollow users not following back</h1>
+              <p><strong>Step 1 : </strong>Scan your following to find users not following back</p>
+              <p><strong>Step 2 : </strong>Unfollow individual users, or mass unfollow</p>
+              <p>&nbsp;</p>
+              <p>
+                <md-button class="md-raised md-primary md-hue-2 whosfollowing " ng-click="scanUnfollowing() ">Check who's not following back</md-button>
+              </p>
+            </div>
+            <div ng-hide="unfollowStep2 ">
+              <h1 class="md-display-1 ">These users are not following back</h1>
+              <p>
+                <div layout="row " class="unfollowAllButtons ">
+                  <ul>
+                    <li>
+                      <md-button class=" md-raised md-warn md-hue-2 whosfollowing " ng-click="scanUnfollowing() ">Mass Unfollow</md-button>
+                    </li>
+                    <li>
+                      <md-button class=" md-raised md-hue-2 whosfollowing " ng-click="cancelUnfollow() ">Cancel</md-button>
+                    </li>
+                  </ul>
+                  <div layout="row" layout-align="right" style="position: absolute; right: 20px; top: 90px;">
+                    <div ng-click="sortArr()" class="sortArray">{{sortTitle || "Newest -> Oldest"}}</div><i class="material-icons">sort</i>
+                  </div>
+                </div>
+              </p>
+              <p>
+                <md-divider ng-if="!$last "></md-divider>
+              </p>
+            </div>
+            <md-grid-list md-cols-xs="1 " md-cols-sm="2 " md-cols-md="3 " md-cols-gt-md="3 " md-row-height-gt-md="3:1
+    " md-row-height="10:2 " md-gutter="12px " md-gutter-gt-sm="8px " class="gridtileoverflow ">
+              <div class="eachTile "></div>
+              <md-grid-tile class="gray " ng-repeat="users in notFollowingdata" ng-model="$index">
+                <md-list-item class="md-3-line eachLine">
+                  <img ng-src="{{users.profile_image_url_https | fixImage}} " width="100% " class="md-avatar ">
+                  <div class="md-list-item-text " layout="column ">
+                    <h3>@{{users.screen_name}}</h3>
+                    <h4>{{users.name}}</h4>
+                  </div>
+                  <div class="md-list-item-text " layout="column " style="margin-left:20px; ">
+                    <p>
+                      <md-button class="md-raised md-primary md-hue-2 " ng-click='unfollow(users.screen_name, $index)'>Unfollow</md-button>
+                    </p>
+                  </div>
+                </md-list-item>
+              </md-grid-tile>
+              </md-grid-list>
+              <div layout="row" style="background-color:blue;"></div>
+              <div class="clear "></div>
+          </md-content>
+        </md-tab>
+        <md-tab label="Follow Back " ng-click="scrollTop()" ng-disabled="tab2">
+          <md-content class="md-padding tabContent">
+            <h1 class="md-display-2 ">Coming soon.</h1>
+            <p>Coming soon.</p>
+          </md-content>
+        </md-tab>
+        <md-tab label="Tweet Deleter" ng-disabled="tab3">
+          <md-content class="md-padding tabContent">
+            <h1 class="md-display-2 ">Coming soon.</h1>
+            <p>Coming soon.</p>
+          </md-content>
+        </md-tab>
+        <md-tab label="Follow By Keyword " ng-disabled="tab4">
+          <md-content class="md-padding tabContent followkeywordtab" ng-app="test" ng-controller="followKeyword">
+            <div ng-hide="followKeyStep1">
+              <h1 class="md-display-1 ">Follow randoms by keyword</h1>
+              <p style="line-height:25px;">Enter your keywords below & adjust the probability scale to find users likely to follow back.</p>
+              <p> A rate limit of 1 follow every 5 seconds is applied.</p>
+              <p>
+                <md-chips ng-model="searchwords" md-removable="true" placeholder="Search Keywords"></md-chips>
+              </p>
+              <p>
+                <md-slider-container>
+                  <md-slider flex min="0" max="100" ng-model="probCalculator" id="red-slider">
+                  </md-slider>
+                  {{probCalculator || 0}}% chance of follow back
+                </md-slider-container>
+              </p>
+              <p>
+                <md-button class="md-raised md-primary md-hue-2 " ng-click='startFollowing()'>Begin Following</md-button>
+              </p>
+            </div>
+            <div ng-show="followKeyStep1">
+              <md-button class="md-raised md-primary md-hue-2 " ng-hide="followButton" ng-click='startFollowing()'>Begin Following</md-button>
+              <md-button class="md-raised md-warn md-hue-2 " ng-click='stopFollowing()' ng-hide="stopFollowButton">Stop Following</md-button>
+              <p>Followed: </p>
+              <md-grid-list md-cols="4" md-gutter="1em" md-row-height="3:1">
+                <md-grid-tile ng-repeat="users in follows" ng-model="$index">
+                  <md-list-item class="md-3-line eachLine">
+                    <img ng-src="{{users.user.profile_image_url_https}} " width="100% " class="md-avatar ">
+                    <div class="md-list-item-text " layout="column ">
+                      <h3>@{{users.user.screen_name}}</h3>
+                      <h4>{{users.user.name}}</h4>
+                    </div>
+                  </md-list-item>
+                </md-grid-tile>
+              </md-grid-list>
+            </div>
+          </md-content>
+        </md-tab>
+        <md-tab label="Favorite By Keyword " ng-disabled="tab5">
+          <md-content class="md-padding tabContent">
+            <h1 class="md-display-2 ">Coming soon.</h1>
+            <p>Coming soon.</p>
+          </md-content>
+        </md-tab>
+        <md-tab label="Unfavorite All " ng-disabled="tabs6">
+          <md-content class="md-padding tabContent">
+            <h1 class="md-display-2 ">Coming soon.</h1>
+            <p>Coming soon.</p>
+          </md-content>
+        </md-tab>
+      </md-tabs>
+    </md-content>
+    <md-progress-linear md-mode="indeterminate " class="loadingbar " ng-show="loading"></md-progress-linear>
+  </div>
+  <!--<div class="pageDivider ">
+    <div class="sidepanel "></div>
+    <div class="mainpanel "></div>
+    <div class="clear "></div>
+  </div>-->
+</body>
+<script>
+  // You can also require other files to run in this process
+  require('./scripts/renderer.js')
+  require('./scripts/directives.js')
+  require('./scripts/filters.js')
+  require('./scripts/followKeyword.js')
+</script>
+
+</html>
